@@ -2,14 +2,16 @@ package com.example.laptrinhandroid_romdatabase;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
-import androidx.room.RoomDatabase;
 
+
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Toast;
+
 
 import com.example.laptrinhandroid_romdatabase.room.AppDatabase;
 import com.example.laptrinhandroid_romdatabase.room.User;
@@ -21,6 +23,9 @@ public class MainActivity extends AppCompatActivity {
     ListView lvi_main_user;
     Button btt_main_insert,btt_main_delete,btt_main_getAll,btt_main_findById;
     EditText edt_id,edt_fname,edt_lname;
+    List<User> users;
+    int index=-1;
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         btt_main_findById.setText("Find By Id");
         btt_main_getAll.setText("Get All");
         btt_main_insert.setText("Insert");
+        btt_main_delete.setText("Delete");
 
 
 
@@ -53,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 AppDatabase.class,"user-database-test").allowMainThreadQueries()
                 .build();
         UserDAO userDAO = db.userDAO();
-        List<User> users = userDAO.getAll();
+        users = userDAO.getAll();
         if(users.size()==0){
             User[] users1 ={new User(1,"Truong","Cuong")
             ,new User(2,"Cong","Cuong")};
@@ -67,20 +73,51 @@ public class MainActivity extends AppCompatActivity {
 
         //action
         btt_main_findById.setOnClickListener(v->{
-            int[] ints= {Integer.parseInt(edt_id.getText().toString())};
-            List<User> usersChange = userDAO.loadAllByIds(ints);
-            dataChange(usersChange);
+
+            if(!edt_id.getText().toString().equalsIgnoreCase("")) {
+                int[] ints = {Integer.parseInt(edt_id.getText().toString())};
+                List<User> usersChange = userDAO.loadAllByIds(ints);
+                dataChange(usersChange);
+                emptyData();
+            }else {
+                Toast.makeText(MainActivity.this,"Id is empty",Toast.LENGTH_SHORT).show();
+            }
         });
 
         btt_main_getAll.setOnClickListener(v->{
-            lvi_main_user.setAdapter(arrayAdapter);
+            dataChange(userDAO.getAll());
+            emptyData();
         });
 
         btt_main_insert.setOnClickListener(v->{
-            User user = new User(Integer.parseInt(edt_id.getText().toString()),edt_fname.getText().toString(),edt_lname.getText().toString());
-            userDAO.insertAll(user);
-            dataChange(userDAO.getAll());
+            if(!isEmptyData()){
+                User user = new User(Integer.parseInt(edt_id.getText().toString()),edt_fname.getText().toString(),edt_lname.getText().toString());
+                userDAO.insertAll(user);
+                dataChange(userDAO.getAll());
+                emptyData();
+            }
+            else
+            {
+                Toast.makeText(MainActivity.this,"Empty Data",Toast.LENGTH_SHORT).show();
+            }
+        });
 
+        lvi_main_user.setOnItemClickListener((parent, view, position, id) -> {
+            index = position;
+            edt_id.setText(String.valueOf(userDAO.getAll().get(position).getId()));
+            edt_fname.setText(userDAO.getAll().get(position).getFirstName());
+            edt_lname.setText(userDAO.getAll().get(position).getLastName());
+        });
+
+        btt_main_delete.setOnClickListener(v->{
+            if(index>=0){
+                userDAO.delete(users.get(index));
+                dataChange(userDAO.getAll());
+                emptyData();
+                index=-1;
+            }else {
+                Toast.makeText(MainActivity.this,"Invalid Object",Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -88,4 +125,20 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter<User> arrayAdapterChange = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, userList);
         lvi_main_user.setAdapter(arrayAdapterChange);
     }
+
+    private void emptyData(){
+        edt_id.setText("");
+        edt_fname.setText("");
+        edt_lname.setText("");
+    }
+    private boolean isEmptyData(){
+        if (edt_id.getText().toString().equalsIgnoreCase(""))
+            return true;
+        if (edt_fname.getText().toString().equalsIgnoreCase(""))
+            return true;
+        if (edt_lname.getText().toString().equalsIgnoreCase(""))
+            return true;
+        return false;
+    }
+
 }
