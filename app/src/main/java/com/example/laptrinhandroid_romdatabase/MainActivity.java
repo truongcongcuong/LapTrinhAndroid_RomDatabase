@@ -20,7 +20,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     ListView lvi_main_user;
     Button btt_main_insert,btt_main_delete,btt_main_getAll,btt_main_findById;
-    EditText edt_id;
+    EditText edt_id,edt_fname,edt_lname;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,12 +33,17 @@ public class MainActivity extends AppCompatActivity {
         btt_main_getAll = findViewById(R.id.btt_main_get_all);
         btt_main_insert = findViewById(R.id.btt_main_insert);
         edt_id = findViewById(R.id.edt_id);
+        edt_fname = findViewById(R.id.edt_fname);
+        edt_lname = findViewById(R.id.edt_lname);
 
         //
         edt_id.setHint("id");
+        edt_fname.setHint("First Name");
+        edt_lname.setHint("Last Name");
 
         btt_main_findById.setText("Find By Id");
         btt_main_getAll.setText("Get All");
+        btt_main_insert.setText("Insert");
 
 
 
@@ -64,12 +69,23 @@ public class MainActivity extends AppCompatActivity {
         btt_main_findById.setOnClickListener(v->{
             int[] ints= {Integer.parseInt(edt_id.getText().toString())};
             List<User> usersChange = userDAO.loadAllByIds(ints);
-            ArrayAdapter<User> arrayAdapterChange = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, usersChange);
-            lvi_main_user.setAdapter(arrayAdapterChange);
+            dataChange(usersChange);
         });
 
         btt_main_getAll.setOnClickListener(v->{
             lvi_main_user.setAdapter(arrayAdapter);
         });
+
+        btt_main_insert.setOnClickListener(v->{
+            User user = new User(Integer.parseInt(edt_id.getText().toString()),edt_fname.getText().toString(),edt_lname.getText().toString());
+            userDAO.insertAll(user);
+            dataChange(userDAO.getAll());
+
+        });
+    }
+
+    private void dataChange(List<User> userList) {
+        ArrayAdapter<User> arrayAdapterChange = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, userList);
+        lvi_main_user.setAdapter(arrayAdapterChange);
     }
 }
