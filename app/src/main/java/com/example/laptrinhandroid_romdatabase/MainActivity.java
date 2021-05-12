@@ -107,11 +107,12 @@ public class MainActivity extends AppCompatActivity {
             edt_id.setText(String.valueOf(userDAO.getAll().get(position).getId()));
             edt_fname.setText(userDAO.getAll().get(position).getFirstName());
             edt_lname.setText(userDAO.getAll().get(position).getLastName());
+            Toast.makeText(MainActivity.this,index+" " ,Toast.LENGTH_SHORT).show();
         });
 
         btt_main_delete.setOnClickListener(v->{
             if(index>=0){
-                userDAO.delete(users.get(index));
+                userDAO.delete(userDAO.getAll().get(index));
                 dataChange(userDAO.getAll());
                 emptyData();
                 index=-1;
