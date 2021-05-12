@@ -1,5 +1,7 @@
 package com.example.laptrinhandroid_romdatabase.room;
 
+
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -22,5 +24,13 @@ public class User {
     }
 
     public User() {
+    }
+
+
+    @Override
+    public String toString() {
+        return id +
+                ". " + firstName  + " "+
+                 lastName ;
     }
 }
